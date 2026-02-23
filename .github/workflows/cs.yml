@@ -1,43 +1,45 @@
-name: C#
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-env:
-  CARGO_TERM_COLOR: always
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    container:
-      image: rust:1.88
-    steps:
-    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
-      with:
-        submodules: 'true'
-    - name: Build
-      run: |
-        cargo build --release --package uniffi-bindgen-cs
-
-  test-bindings:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/nordsecurity/uniffi-bindgen-cs-test-runner:v0.2.1
-    steps:
-    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
-      with:
-        submodules: 'true'
-    - name: Test bindings
-      shell: bash
-      env:
-        # Github sets HOME to /github/home and breaks dependencies in Docker image..
-        # https://github.com/actions/runner/issues/863
-        HOME: /root
-      run: |
-        source ~/.bashrc
-        ./build.sh
-        ./generate_bindings.sh
-        ./test_bindings.sh
+# Disabled in favor of ci.yaml — kept to reduce merge conflicts with upstream.
+#
+# name: C#
+#
+# on:
+#   push:
+#     branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
+#
+# env:
+#   CARGO_TERM_COLOR: always
+#
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     container:
+#       image: rust:1.88
+#     steps:
+#     - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+#       with:
+#         submodules: 'true'
+#     - name: Build
+#       run: |
+#         cargo build --release --package uniffi-bindgen-cs
+#
+#   test-bindings:
+#     runs-on: ubuntu-latest
+#     container:
+#       image: ghcr.io/nordsecurity/uniffi-bindgen-cs-test-runner:v0.2.1
+#     steps:
+#     - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+#       with:
+#         submodules: 'true'
+#     - name: Test bindings
+#       shell: bash
+#       env:
+#         # Github sets HOME to /github/home and breaks dependencies in Docker image..
+#         # https://github.com/actions/runner/issues/863
+#         HOME: /root
+#       run: |
+#         source ~/.bashrc
+#         ./build.sh
+#         ./generate_bindings.sh
+#         ./test_bindings.sh
