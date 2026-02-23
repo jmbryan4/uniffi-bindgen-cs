@@ -1,4 +1,9 @@
 ### UNRELEASED
+- **BREAKING** Upgrade to [UniFFI 0.31.0](https://mozilla.github.io/uniffi-rs/latest/Upgrading.html)
+  - Removed `--lib-file` CLI argument (library files are now auto-detected)
+  - Updated `CrateConfigSupplier` to use new `from_cargo_metadata_command` API
+  - Removed direct `cargo_metadata` dependency (now provided transitively by `uniffi_bindgen`)
+  - Method checksums no longer include the self type (must rebuild both Rust and bindings together)
 - **BREAKING** Upgrade to [UniFFI 0.30.0](https://mozilla.github.io/uniffi-rs/latest/Upgrading.html)
   - Object handles now use `ulong` (u64) instead of `IntPtr` due to UniFFI's change from pointer-based handles to explicit u64 values in the FFI interface
   - Updated to handle new DefaultValue API for method parameters and record fields

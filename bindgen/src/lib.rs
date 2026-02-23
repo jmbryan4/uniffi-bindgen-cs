@@ -5,7 +5,7 @@
 pub mod gen_cs;
 
 use anyhow::Result;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use clap::Parser;
 use fs_err::File;
 pub use gen_cs::generate_bindings;
@@ -26,12 +26,8 @@ struct Cli {
     #[clap(long, short)]
     config: Option<Utf8PathBuf>,
 
-    /// Extract proc-macro metadata from cdylib for this crate.
-    #[clap(long)]
-    lib_file: Option<Utf8PathBuf>,
-
     /// Pass in a cdylib path rather than a UDL file
-    #[clap(long = "library", conflicts_with_all = &["lib-file"], requires = "out-dir")]
+    #[clap(long = "library", requires = "out-dir")]
     library_mode: bool,
 
     /// When `--library` is passed, only generate bindings for one crate
@@ -147,9 +143,7 @@ pub fn main() -> Result<()> {
 
         let config_supplier = {
             use uniffi_bindgen::cargo_metadata::CrateConfigSupplier;
-            let cmd = ::cargo_metadata::MetadataCommand::new();
-            let metadata = cmd.exec().unwrap();
-            CrateConfigSupplier::from(metadata)
+            CrateConfigSupplier::from_cargo_metadata_command(false)?
         };
 
         uniffi_bindgen::library_mode::generate_bindings(
@@ -172,7 +166,7 @@ pub fn main() -> Result<()> {
             &cli.source,
             cli.config.as_deref(),
             cli.out_dir.as_deref(),
-            cli.lib_file.as_deref(),
+            None::<&Utf8Path>,
             cli.crate_name.as_deref(),
             !cli.no_format,
         )
