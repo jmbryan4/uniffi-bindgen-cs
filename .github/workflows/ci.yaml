@@ -67,6 +67,8 @@ jobs:
 
       - name: Test bindings
         run: ./test_bindings.sh
+        env:
+          RUST_BACKTRACE: 1
 
   clippy:
     name: Clippy
