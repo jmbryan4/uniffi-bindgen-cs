@@ -111,6 +111,10 @@ impl uniffi_bindgen::BindingGenerator for BindingGenerator {
                     .clone()
                     .unwrap_or_else(|| format!("uniffi_{}", c.ci.namespace()))
             });
+
+            if !c.config.rename().is_empty() {
+                uniffi_bindgen::interface::rename(&mut c.ci, c.config.rename());
+            }
         }
         // TODO: external types are not supported
         // let packages = HashMap::<String, String>::from_iter(
