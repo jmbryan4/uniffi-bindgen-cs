@@ -83,6 +83,8 @@ pub struct Config {
     global_methods_class_name: Option<String>,
     access_modifier: Option<String>,
     null_string_to_empty: Option<bool>,
+    #[serde(default)]
+    omit_checksums: bool,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
