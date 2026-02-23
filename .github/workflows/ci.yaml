@@ -81,6 +81,9 @@ jobs:
         with:
           components: clippy
 
+      - name: Ensure clippy is available
+        run: rustup component add clippy
+
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
 
@@ -97,6 +100,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+
+      - name: Ensure rustfmt is available
+        run: rustup component add rustfmt
 
       - name: Check Rust formatting
         run: cargo fmt --all -- --check
