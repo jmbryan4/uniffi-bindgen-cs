@@ -87,11 +87,14 @@ pub(super) fn read_fn(as_ct: &impl AsCodeType) -> Result<String, askama::Error> 
 }
 
 pub(super) fn render_literal(
-    literal: &Literal,
+    default: &DefaultValue,
     as_ct: &impl AsCodeType,
     ci: &ComponentInterface,
 ) -> Result<String, askama::Error> {
-    Ok(as_ct.as_codetype().literal(literal, ci))
+    match default {
+        DefaultValue::Default => Ok(as_ct.as_codetype().default_value(ci)),
+        DefaultValue::Literal(literal) => Ok(as_ct.as_codetype().literal(literal, ci)),
+    }
 }
 
 pub(super) fn ffi_type(type_: &impl AsType) -> Result<FfiType, askama::Error> {
@@ -120,6 +123,11 @@ pub(super) fn fn_name(nm: &str) -> Result<String, askama::Error> {
 /// Get the idiomatic C# rendering of a variable name.
 pub(super) fn var_name(nm: impl AsRef<str>) -> Result<String, askama::Error> {
     Ok(oracle().var_name(nm.as_ref()))
+}
+
+/// Get the idiomatic C# rendering of a property name (for record positional parameters).
+pub(super) fn property_name(nm: impl AsRef<str>) -> Result<String, askama::Error> {
+    Ok(oracle().property_name(nm.as_ref()))
 }
 
 /// Get the idiomatic C# rendering of an individual enum variant.

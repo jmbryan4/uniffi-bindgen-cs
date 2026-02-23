@@ -12,7 +12,6 @@ use askama::Template;
 use heck::{ToLowerCamelCase, ToUpperCamelCase};
 use serde::{Deserialize, Serialize};
 
-use uniffi_bindgen::backend::Type;
 use uniffi_bindgen::interface::*;
 use uniffi_bindgen::ComponentInterface;
 
@@ -41,6 +40,10 @@ trait CodeType: Debug {
     fn canonical_name(&self) -> String;
 
     fn literal(&self, _literal: &Literal, ci: &ComponentInterface) -> String {
+        unimplemented!("Unimplemented for {}", self.type_label(ci))
+    }
+
+    fn default_value(&self, ci: &ComponentInterface) -> String {
         unimplemented!("Unimplemented for {}", self.type_label(ci))
     }
 
@@ -75,9 +78,13 @@ pub struct Config {
     custom_types: HashMap<String, CustomTypeConfig>,
     #[serde(default)]
     external_packages: HashMap<String, String>,
+    #[serde(default)]
+    rename: HashMap<String, toml::value::Table>,
     global_methods_class_name: Option<String>,
     access_modifier: Option<String>,
     null_string_to_empty: Option<bool>,
+    #[serde(default)]
+    omit_checksums: bool,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -117,6 +124,10 @@ impl Config {
             Some(value) => value.clone(),
             None => "internal".to_string(),
         }
+    }
+
+    pub fn rename(&self) -> &HashMap<String, toml::value::Table> {
+        &self.rename
     }
 }
 
@@ -335,6 +346,14 @@ impl CsCodeOracle {
         format!("@{}", nm.to_string().to_lower_camel_case())
     }
 
+    /// Get the idiomatic C# rendering of a property name (for record positional parameters).
+    /// Uses PascalCase per Microsoft naming conventions.
+    /// Note: No keyword escaping is needed because C# keywords are lowercase,
+    /// and PascalCase conversion naturally avoids conflicts (e.g., "class" → "Class").
+    fn property_name(&self, nm: &str) -> String {
+        nm.to_string().to_upper_camel_case()
+    }
+
     /// Get the idiomatic C# rendering of an individual enum variant.
     fn enum_variant_name(&self, nm: &str) -> String {
         nm.to_string().to_upper_camel_case()
@@ -381,7 +400,6 @@ impl CsCodeOracle {
             FfiType::Int16 => "short".to_string(),
             FfiType::Int32 => "int".to_string(),
             FfiType::Int64 => "long".to_string(),
-            FfiType::Handle => "IntPtr".to_string(),
             FfiType::Int8 => "sbyte".to_string(),
             FfiType::UInt16 => "ushort".to_string(),
             FfiType::UInt32 => "uint".to_string(),
@@ -389,7 +407,7 @@ impl CsCodeOracle {
             FfiType::UInt8 => "byte".to_string(),
             FfiType::Float32 => "float".to_string(),
             FfiType::Float64 => "double".to_string(),
-            FfiType::RustArcPtr(_) => "IntPtr".to_string(),
+            FfiType::Handle => "ulong".to_string(),
             FfiType::RustBuffer(_) => "RustBuffer".to_string(),
             FfiType::ForeignBytes => "ForeignBytes".to_string(),
             FfiType::Callback(_) => "IntPtr".to_string(),
