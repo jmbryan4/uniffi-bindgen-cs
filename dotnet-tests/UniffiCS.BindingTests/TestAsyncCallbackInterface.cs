@@ -4,6 +4,7 @@
 
 using System.Threading.Tasks;
 using uniffi.issue_165;
+using AsyncCallback = uniffi.issue_165.AsyncCallback;
 
 namespace UniffiCS.BindingTests;
 
@@ -65,5 +66,28 @@ public class TestAsyncCallbackInterface
         var cb = new CSharpAsyncCallback();
         await Assert.ThrowsAsync<AsyncCallbackException.Unexpected>(
             () => Issue165Methods.CallDoAsyncVoidThrows(cb, "throw"));
+    }
+
+    // Regression guard for the !_callbackInvoked fix in Async.cs (commit 2b78c8c).
+    // The old MarkDropped called Cts.Cancel() unconditionally; after Dispose() had already
+    // run on the normal-completion path this threw ObjectDisposedException on every call.
+    [Fact]
+    public async Task TestNoObjectDisposedExceptionOnNormalCompletion()
+    {
+        var cb = new CSharpAsyncCallback();
+        bool sawODE = false;
+        System.EventHandler<System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs> handler =
+            (_, e) => { if (e.Exception is System.ObjectDisposedException) sawODE = true; };
+        System.AppDomain.CurrentDomain.FirstChanceException += handler;
+        try
+        {
+            var result = await Issue165Methods.CallDoAsync(cb, "hello");
+            Assert.Equal("hello", result);
+        }
+        finally
+        {
+            System.AppDomain.CurrentDomain.FirstChanceException -= handler;
+        }
+        Assert.False(sawODE, "ObjectDisposedException was raised during normal async callback completion — MarkDropped guard may have regressed");
     }
 }

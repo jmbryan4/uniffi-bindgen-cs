@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 using uniffi.csharp_gap_fixes;
+using Monitor = uniffi.csharp_gap_fixes.Monitor;
 
 namespace UniffiCS.BindingTests;
 
